@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU Price Scraper - Produtos</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path
+                            d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                    </svg>
+                    <span class="logo-text">GPU Scraper</span>
+                </div>
+                <nav class="nav">
+                    <a href="index.html" class="nav-link">Dashboard</a>
+                    <a href="products.html" class="nav-link active">Produtos</a>
+                    <a href="analytics.html" class="nav-link">Analytics</a>
+                    <a href="scrapers.html" class="nav-link">Scrapers</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Produtos</h1>
+                <p class="page-subtitle">Listagem completa de GPUs monitoradas</p>
+            </div>
+
+            <!-- Filters (Placeholder) -->
+            <div class="section">
+                <div class="card">
+                    <p>Filtros em breve...</p>
+                </div>
+            </div>
+
+            <!-- Products List -->
+            <div class="products-grid" id="productsGrid">
+                <p>Carregando produtos...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-text">© 2024 GPU Price Scraper. Desenvolvido com ❤️</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script>
+        // Inline script for now to fetch products
+        document.addEventListener('DOMContentLoaded', async () => {
+            const grid = document.getElementById('productsGrid');
+            try {
+                // Determine page from URL query param
+                const urlParams = new URLSearchParams(window.location.search);
+                const page = parseInt(urlParams.get('page')) || 1;
+                const search = urlParams.get('search') || '';
+
+                const limit = 50;
+                const offset = (page - 1) * limit;
+
+                let products = [];
+                if (search) {
+                    // backend expects 'query' and 'offset' request to api.js (which maps to URL params)
+                    // api.searchProducts(params) -> /api?param=val
+                    products = await api.searchProducts({ query: search, limit: limit, offset: offset });
+                } else {
+                    // backend expects 'offset'
+                    products = await api.getProducts({ limit: limit, offset: offset });
+                }
+
+                if (!products || products.length === 0) {
+                    grid.innerHTML = '<p class="empty-state">Nenhum produto encontrado.</p>';
+                    return;
+                }
+
+                // Helper to format currency
+                const formatCurrency = (value) => {
+                    return new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                    }).format(value);
+                };
+
+                grid.innerHTML = products.map(product => {
+                    const storeBadgeClass = `badge-${product.store.toLowerCase()}`;
+                    const chipBadgeClass = `badge-${product.chip_brand ? product.chip_brand.toLowerCase() : 'unknown'}`;
+
+                    return `
+                        <div class="product-card">
+                            <div class="product-header">
+                                <span class="badge ${storeBadgeClass}">${product.store}</span>
+                                <span class="badge ${chipBadgeClass}">${product.chip_brand || 'N/A'}</span>
+                            </div>
+                            <h3 class="product-title">${product.title}</h3>
+                            <div class="product-info">
+                                <p class="product-manufacturer">${product.manufacturer || ''}</p>
+                                <p class="product-model">${product.model || ''}</p>
+                            </div>
+                            <div class="product-footer">
+                                <p class="product-price">${formatCurrency(product.price)}</p>
+                                <a href="${product.url}" target="_blank" class="btn btn-sm btn-primary">
+                                    Ver Oferta
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error("Error loading products:", error);
+                grid.innerHTML = '<p class="error-state">Erro ao carregar produtos.</p>';
+            }
+        });
+    </script>
+</body>
+
+</html>

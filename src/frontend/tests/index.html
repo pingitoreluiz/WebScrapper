@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Tests - GPU Scraper</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #00ff00;
+            border-bottom: 2px solid #00ff00;
+            padding-bottom: 0.5rem;
+        }
+
+        #console {
+            background: #000;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            font-size: 14px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .passed {
+            color: #00ff00;
+        }
+
+        .failed {
+            color: #ff0000;
+        }
+
+        .info {
+            color: #00aaff;
+        }
+
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background: #00cc00;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧪 Frontend Test Suite</h1>
+    <p>Testing API Client, Utility Functions, and DOM Components</p>
+
+    <button onclick="runTests()">▶️ Run All Tests</button>
+
+    <div id="console"></div>
+
+    <!-- Load dependencies -->
+    <script src="../js/api.js"></script>
+    <script src="../js/dashboard.js"></script>
+    <script src="test-framework.js"></script>
+
+    <script>
+        // Override console.log to display in page
+        const consoleDiv = document.getElementById('console');
+        const originalLog = console.log;
+        const originalError = console.error;
+
+        console.log = function (...args) {
+            const message = args.join(' ');
+            const div = document.createElement('div');
+
+            if (message.includes('✅')) {
+                div.className = 'passed';
+            } else if (message.includes('❌')) {
+                div.className = 'failed';
+            } else if (message.includes('📦') || message.includes('📊')) {
+                div.className = 'info';
+                div.style.fontWeight = 'bold';
+            }
+
+            div.textContent = message;
+            consoleDiv.appendChild(div);
+            originalLog.apply(console, args);
+        };
+
+        console.error = function (...args) {
+            const message = args.join(' ');
+            const div = document.createElement('div');
+            div.className = 'failed';
+            div.textContent = message;
+            consoleDiv.appendChild(div);
+            originalError.apply(console, args);
+        };
+
+        async function runTests() {
+            consoleDiv.innerHTML = '';
+            await testRunner.runAll();
+        }
+
+        // Auto-run tests on load
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 500);
+        });
+    </script>
+</body>
+
+</html>

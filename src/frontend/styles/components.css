@@ -1,0 +1,173 @@
+/* Additional CSS for Products and Components */
+
+/* ===== Product Cards ===== */
+.product-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+.product-header {
+    padding: var(--spacing-md);
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.badge {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-pichau {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--primary);
+}
+
+.badge-kabum {
+    background: rgba(249, 115, 22, 0.1);
+    color: #F97316;
+}
+
+.badge-terabyte {
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--secondary);
+}
+
+.badge-nvidia {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.badge-amd {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error);
+}
+
+.badge-intel {
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--info);
+}
+
+.product-title {
+    padding: 0 var(--spacing-md);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--gray-900);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.8em;
+}
+
+.product-info {
+    padding: var(--spacing-md);
+    flex: 1;
+}
+
+.product-manufacturer {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    margin-bottom: var(--spacing-xs);
+}
+
+.product-model {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.product-footer {
+    padding: var(--spacing-md);
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+}
+
+.product-price {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--gray-900);
+}
+
+.btn-sm {
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: var(--font-size-sm);
+}
+
+/* ===== Loading & States ===== */
+.loading,
+.error,
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-2xl);
+}
+
+.loading {
+    color: var(--gray-500);
+}
+
+.error {
+    color: var(--error);
+}
+
+.empty-state {
+    color: var(--gray-500);
+    font-size: var(--font-size-lg);
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== Toast Variants ===== */
+.toast-success {
+    background: var(--success);
+    color: white;
+}
+
+.toast-error {
+    background: var(--error);
+    color: white;
+}
+
+.toast-warning {
+    background: var(--warning);
+    color: white;
+}
+
+.toast-info {
+    background: var(--info);
+    color: white;
+}
+
+.activity-icon-error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error);
+}
