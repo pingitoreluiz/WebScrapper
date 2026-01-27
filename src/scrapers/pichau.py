@@ -106,8 +106,21 @@ class PichauScraper(BaseScraper):
                                 continue
                         
                         if valid_values:
-                            # Typically the lowest price is the cash/pix price
-                            best_price = min(valid_values)
+                            # Heuristic: Pichau often includes the "12x" installment value (e.g. 529.41)
+                            # alongside the full price (e.g. 5399.99).
+                            # We want the lowest price that IS NOT an installment.
+                            
+                            max_val = max(valid_values)
+                            # Installments are typically ~1/10th or 1/12th of the max price.
+                            # We filter out anything smaller than 20% of the maximum detected value.
+                            real_prices = [v for v in valid_values if v > (max_val * 0.2)]
+                            
+                            if real_prices:
+                                best_price = min(real_prices)
+                            else:
+                                # Fallback if filtering removed everything (unlikely)
+                                best_price = min(valid_values)
+
                             # Convert back to BR format string for display
                             price_formatted = f"R$ {best_price:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
                             return price_formatted, best_price
