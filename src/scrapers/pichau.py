@@ -37,8 +37,13 @@ class PichauScraper(BaseScraper):
             ),
             link=SelectorSet(
                 selectors=[
+                    "a[data-cy*='product-link']",
+                    "a[data-cy*='product-name']",
+                    "a[href*='/hardware/']",
                     "a",
-                    "a[data-cy*='product-link']"
+                    "xpath=.",
+                    "xpath=parent::a",
+                    "xpath=ancestor::a"
                 ],
                 description="Link do produto"
             ),
@@ -70,7 +75,6 @@ class PichauScraper(BaseScraper):
                 count = await price_div_locator.count()
                 
                 if count > 0:
-                    # Strategy: Get all text from price area and parse numbers
                     text = await element.inner_text()
                     
                     import re
@@ -79,19 +83,41 @@ class PichauScraper(BaseScraper):
                     if matches:
                         valid_values = []
                         for m in matches:
-                            clean = m.replace(".", "").replace(",", ".")
                             try:
-                                val = float(clean)
-                                if val > 100: # Sanity check
-                                    valid_values.append(val)
+                                # Smart parsing for US (1,234.56) vs BR (1.234,56) formats
+                                clean_val = 0.0
+                                if "," in m and "." in m:
+                                    if m.rfind(".") > m.rfind(","):
+                                        # US Format (comma then dot) -> "26,999.99"
+                                        clean_val = float(m.replace(",", ""))
+                                    else:
+                                        # BR Format (dot then comma) -> "26.999,99"
+                                        clean_val = float(m.replace(".", "").replace(",", "."))
+                                elif "," in m:
+                                    # Assume BR decimal -> "1234,56"
+                                    clean_val = float(m.replace(",", "."))
+                                else:
+                                    # Assume plain number -> "1234.56" or "1234"
+                                    clean_val = float(m)
+
+                                if clean_val > 100: # Sanity check
+                                    valid_values.append(clean_val)
                             except:
                                 continue
                         
                         if valid_values:
                             # Typically the lowest price is the cash/pix price
                             best_price = min(valid_values)
-                            return f"R$ {best_price:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."), best_price
-            except:
+                            # Convert back to BR format string for display
+                            price_formatted = f"R$ {best_price:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+                            return price_formatted, best_price
+                        else:
+                             self.logger.warning("pichau_price_parse_failed", text_snippet=text[:100], matches=matches)
+
+                else:
+                    pass # Selector didn't match
+            except Exception as e:
+                self.logger.error("pichau_price_error", error=str(e))
                 continue
         
         return None

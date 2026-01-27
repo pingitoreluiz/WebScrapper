@@ -254,3 +254,22 @@ class ProductSearchQuery(BaseModel):
     offset: int = Field(default=0, ge=0)
     sort_by: str = Field(default="price", pattern="^(price|date|title)$")
     sort_order: str = Field(default="asc", pattern="^(asc|desc)$")
+
+
+class AnalyticsHistoryPoint(BaseModel):
+    """
+    Data point for price history chart.
+    """
+    date: str  # ISO Format YYYY-MM-DD
+    average_price: float
+    min_price: float
+
+
+class AnalyticsStoreComparison(BaseModel):
+    """
+    Data point for store comparison chart.
+    """
+    store: Store
+    product_count: int
+    average_price: float
+    cheapest_product_price: float

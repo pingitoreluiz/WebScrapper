@@ -164,6 +164,7 @@ class BaseScraper(ABC):
         
         Can be overridden for store-specific validation.
         """
+        # Validate
         if not result.is_valid():
             return False
         

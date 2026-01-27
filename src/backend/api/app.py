@@ -126,7 +126,7 @@ def register_exception_handlers(app: FastAPI) -> None:
 
 def register_routes(app: FastAPI) -> None:
     """Register API routes"""
-    from .routes import health, products, scrapers
+    from .routes import health, products, scrapers, analytics
     
     # Health check (no prefix)
     app.include_router(health.router, tags=["Health"])
@@ -142,6 +142,12 @@ def register_routes(app: FastAPI) -> None:
         scrapers.router,
         prefix="/api/v1/scrapers",
         tags=["Scrapers"]
+    )
+
+    app.include_router(
+        analytics.router,
+        prefix="/api/v1/analytics",
+        tags=["Analytics"]
     )
     
     logger.info("routes_registered")

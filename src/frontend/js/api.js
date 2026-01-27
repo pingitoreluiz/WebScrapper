@@ -13,7 +13,7 @@ class APIClient {
         this.headers = {
             'Content-Type': 'application/json',
         };
-        
+
         if (API_KEY) {
             this.headers['X-API-Key'] = API_KEY;
         }
@@ -31,11 +31,11 @@ class APIClient {
 
         try {
             const response = await fetch(url, config);
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
             return await response.json();
         } catch (error) {
             console.error('API request failed:', error);
@@ -101,6 +101,20 @@ class APIClient {
     async getScraperMetrics(days = 7) {
         return this.request(`/api/v1/scrapers/metrics?days=${days}`);
     }
+    /**
+     * Get price history
+     * @param {number} days - Number of days
+     */
+    async getAnalyticsHistory(days = 30) {
+        return this.request(`/analytics/history?days=${days}`);
+    }
+
+    /**
+     * Get store comparison stats
+     */
+    async getAnalyticsComparison() {
+        return this.request(`/analytics/comparison`);
+    }
 }
 
 // Create global API instance
@@ -143,7 +157,7 @@ function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     toast.textContent = message;
     toast.className = `toast show toast-${type}`;
-    
+
     setTimeout(() => {
         toast.className = 'toast';
     }, 3000);
