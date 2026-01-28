@@ -26,16 +26,24 @@ async def list_products(
     offset: int = Query(default=0, ge=0),
     sort_by: str = Query(default="price", pattern="^(price|date|title)$"),
     sort_order: str = Query(default="asc", pattern="^(asc|desc)$"),
+    chip_brand: Optional[ChipBrand] = None,
+    store: Optional[Store] = None,
+    min_price: Optional[float] = Query(default=None, ge=0),
+    max_price: Optional[float] = Query(default=None, ge=0),
     db: Session = Depends(get_db)
 ):
     """
-    List products with pagination
+    List products with pagination and filters
     
     Args:
         limit: Maximum number of results (1-1000)
         offset: Number of results to skip
         sort_by: Sort field (price, date, title)
         sort_order: Sort order (asc, desc)
+        chip_brand: Filter by chip brand
+        store: Filter by store
+        min_price: Minimum price
+        max_price: Maximum price
         
     Returns:
         List of products
@@ -46,7 +54,11 @@ async def list_products(
         limit=limit,
         offset=offset,
         sort_by=sort_by,
-        sort_order=sort_order
+        sort_order=sort_order,
+        chip_brand=chip_brand,
+        store=store,
+        min_price=min_price,
+        max_price=max_price
     )
     
     products = repo.search(query)

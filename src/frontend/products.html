@@ -42,16 +42,63 @@
                 <p class="page-subtitle">Listagem completa de GPUs monitoradas</p>
             </div>
 
-            <!-- Filters (Placeholder) -->
-            <div class="section">
-                <div class="card">
-                    <p>Filtros em breve...</p>
-                </div>
-            </div>
+            <!-- Filters Section -->
+            <div class="filters-container">
+                <aside class="filters-sidebar">
+                    <div class="filter-group">
+                        <label for="searchInput">Busca</label>
+                        <input type="text" id="searchInput" class="form-input" placeholder="RTX 4060, Asus...">
+                    </div>
 
-            <!-- Products List -->
-            <div class="products-grid" id="productsGrid">
-                <p>Carregando produtos...</p>
+                    <div class="filter-group">
+                        <label for="chipFilter">GPU Brand</label>
+                        <select id="chipFilter" class="form-select">
+                            <option value="">Todas</option>
+                            <option value="NVIDIA">NVIDIA</option>
+                            <option value="AMD">AMD</option>
+                            <option value="INTEL">INTEL</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="storeFilter">Loja</label>
+                        <select id="storeFilter" class="form-select">
+                            <option value="">Todas</option>
+                            <option value="Kabum">Kabum</option>
+                            <option value="Pichau">Pichau</option>
+                            <option value="Terabyte">Terabyte</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Preço (R$)</label>
+                        <div class="price-inputs">
+                            <input type="number" id="minPrice" class="form-input" placeholder="Min" min="0">
+                            <input type="number" id="maxPrice" class="form-input" placeholder="Max" min="0">
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="sortSelect">Ordenar por</label>
+                        <select id="sortSelect" class="form-select">
+                            <option value="price-asc">Preço: Menor para Maior</option>
+                            <option value="price-desc">Preço: Maior para Menor</option>
+                            <option value="date-desc">Mais Recentes</option>
+                        </select>
+                    </div>
+
+                    <button id="applyFiltersBtn" class="btn btn-primary btn-full">
+                        Aplicar Filtros
+                    </button>
+
+                </aside>
+
+                <!-- Products List -->
+                <div class="products-grid-wrapper">
+                    <div class="products-grid" id="productsGrid">
+                        <p>Carregando produtos...</p>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -65,73 +112,7 @@
 
     <!-- Scripts -->
     <script src="js/api.js"></script>
-    <script>
-        // Inline script for now to fetch products
-        document.addEventListener('DOMContentLoaded', async () => {
-            const grid = document.getElementById('productsGrid');
-            try {
-                // Determine page from URL query param
-                const urlParams = new URLSearchParams(window.location.search);
-                const page = parseInt(urlParams.get('page')) || 1;
-                const search = urlParams.get('search') || '';
-
-                const limit = 50;
-                const offset = (page - 1) * limit;
-
-                let products = [];
-                if (search) {
-                    // backend expects 'query' and 'offset' request to api.js (which maps to URL params)
-                    // api.searchProducts(params) -> /api?param=val
-                    products = await api.searchProducts({ query: search, limit: limit, offset: offset });
-                } else {
-                    // backend expects 'offset'
-                    products = await api.getProducts({ limit: limit, offset: offset });
-                }
-
-                if (!products || products.length === 0) {
-                    grid.innerHTML = '<p class="empty-state">Nenhum produto encontrado.</p>';
-                    return;
-                }
-
-                // Helper to format currency
-                const formatCurrency = (value) => {
-                    return new Intl.NumberFormat('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL'
-                    }).format(value);
-                };
-
-                grid.innerHTML = products.map(product => {
-                    const storeBadgeClass = `badge-${product.store.toLowerCase()}`;
-                    const chipBadgeClass = `badge-${product.chip_brand ? product.chip_brand.toLowerCase() : 'unknown'}`;
-
-                    return `
-                        <div class="product-card">
-                            <div class="product-header">
-                                <span class="badge ${storeBadgeClass}">${product.store}</span>
-                                <span class="badge ${chipBadgeClass}">${product.chip_brand || 'N/A'}</span>
-                            </div>
-                            <h3 class="product-title">${product.title}</h3>
-                            <div class="product-info">
-                                <p class="product-manufacturer">${product.manufacturer || ''}</p>
-                                <p class="product-model">${product.model || ''}</p>
-                            </div>
-                            <div class="product-footer">
-                                <p class="product-price">${formatCurrency(product.price)}</p>
-                                <a href="${product.url}" target="_blank" class="btn btn-sm btn-primary">
-                                    Ver Oferta
-                                </a>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-            } catch (error) {
-                console.error("Error loading products:", error);
-                grid.innerHTML = '<p class="error-state">Erro ao carregar produtos.</p>';
-            }
-        });
-    </script>
+    <script src="js/products.js"></script>
 </body>
 
 </html>
