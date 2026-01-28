@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from src.backend.api.app import create_app
 from src.backend.core.models import Store
 from src.backend.core.database_models import Product
-from datetime import datetime
+
 
 
 @pytest.fixture

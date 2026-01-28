@@ -12,7 +12,6 @@ from src.data.processors import (
     DataCleaner,
     DataValidator,
     DataEnricher,
-    ValidationError,
 )
 from src.backend.core.models import ProductInDB, RawProduct, Price, Store, ChipBrand
 

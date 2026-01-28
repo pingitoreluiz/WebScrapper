@@ -5,7 +5,7 @@ Tests the reusable scraper components.
 """
 
 import pytest
-from decimal import Decimal
+
 
 from src.scrapers.components.data_extractor import DataExtractor
 from src.scrapers.components.product_enricher import (

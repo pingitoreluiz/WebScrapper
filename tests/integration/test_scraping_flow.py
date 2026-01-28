@@ -23,8 +23,8 @@ class TestScrapingFlow:
             store=Store.PICHAU, headless=True, max_pages=1, timeout=30
         )
 
-        # Create scraper (using factory)
-        scraper = ScraperFactory.create(Store.PICHAU, config)
+        # Create scraper (using factory) - Verify no exception is raised
+        ScraperFactory.create(Store.PICHAU, config)
 
         # Note: This would require mocking or actual scraping
         # For now, we'll test with mock data
