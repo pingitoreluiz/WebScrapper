@@ -8,7 +8,8 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from src.backend.core.database import Base
-from src.backend.core.models import Product, ScraperRun, Store
+from src.backend.core.models import Store
+from src.backend.core.database_models import Product, ScraperRun
 from datetime import datetime
 
 

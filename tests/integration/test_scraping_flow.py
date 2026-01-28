@@ -9,7 +9,8 @@ from src.scrapers.factory import ScraperFactory
 from src.scrapers.models import ScraperConfig
 from src.data.processors.cleaner import DataCleaner
 from src.data.processors.validator import DataValidator
-from src.backend.core.models import Product, Store
+from src.backend.core.models import Store
+from src.backend.core.database_models import Product
 
 
 class TestScrapingFlow:
