@@ -5,6 +5,7 @@ Provides browser fixtures and setup for end-to-end testing
 """
 
 import pytest
+import os
 from playwright.sync_api import sync_playwright, Browser, Page, BrowserContext
 
 
@@ -39,10 +40,10 @@ def page(context: BrowserContext) -> Page:
 @pytest.fixture(scope="session")
 def base_url():
     """Base URL for the application"""
-    return "http://localhost"
+    return os.getenv("BASE_URL", "http://localhost:3000")
 
 
 @pytest.fixture(scope="session")
 def api_base_url():
     """Base URL for the API"""
-    return "http://localhost:8000"
+    return os.getenv("API_BASE_URL", "http://localhost:8000")
