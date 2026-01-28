@@ -16,7 +16,8 @@ class TestDashboardJourney:
         page.goto(base_url)
 
         # Verify page title
-        expect(page).to_have_title("GPU Price Scraper Dashboard")
+        # Verify page title
+        expect(page).to_have_title("GPU Price Scraper - Dashboard")
 
         # Verify main sections are visible
         expect(page.locator("h1")).to_contain_text("GPU Price Scraper")

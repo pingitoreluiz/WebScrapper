@@ -145,3 +145,17 @@ class PichauScraper(BaseScraper):
                 continue
 
         return None
+    
+    async def _load_page(self, url: str) -> None:
+        """Override to check for maintenance pages"""
+        await super()._load_page(url)
+        
+        # Check for specific maintenance title
+        try:
+            title = await self.page.title()
+            if "Site em Manutenção" in title or "Pru Pru" in title:
+                self.logger.warning("site_maintenance_detected", url=url)
+                from .exceptions import PageLoadError
+                raise PageLoadError(url, "Site running maintenance")
+        except Exception:
+            raise
