@@ -11,57 +11,65 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class DatabaseConfig(BaseSettings):
     """Database configuration"""
-    
+
     url: str = Field(default="sqlite:///data/prices.db", description="Database URL")
     echo: bool = Field(default=False, description="Echo SQL queries")
     pool_size: int = Field(default=5, description="Connection pool size")
     max_overflow: int = Field(default=10, description="Max overflow connections")
-    
+
     model_config = SettingsConfigDict(env_prefix="DB_", extra="ignore")
 
 
 class APIConfig(BaseSettings):
     """API server configuration"""
-    
+
     host: str = Field(default="0.0.0.0", description="API host")
     port: int = Field(default=8000, description="API port")
     workers: int = Field(default=4, description="Number of workers")
-    api_key: str = Field(default="change-this-secret-key", description="API authentication key")
+    api_key: str = Field(
+        default="change-this-secret-key", description="API authentication key"
+    )
     cors_origins: List[str] = Field(default=["*"], description="CORS allowed origins")
-    
+
     model_config = SettingsConfigDict(env_prefix="API_", extra="ignore")
 
 
 class ScraperConfig(BaseSettings):
     """Scraper configuration"""
-    
+
     max_concurrent: int = Field(default=3, description="Max concurrent scrapers")
     timeout: int = Field(default=60, description="Scraper timeout in seconds")
     headless: bool = Field(default=True, description="Run browser in headless mode")
     max_pages: int = Field(default=20, description="Max pages per scraper")
-    
+
     # Timing configuration
-    min_delay: float = Field(default=1.5, description="Min delay between actions (seconds)")
-    max_delay: float = Field(default=3.5, description="Max delay between actions (seconds)")
+    min_delay: float = Field(
+        default=1.5, description="Min delay between actions (seconds)"
+    )
+    max_delay: float = Field(
+        default=3.5, description="Max delay between actions (seconds)"
+    )
     page_timeout: int = Field(default=30000, description="Page load timeout (ms)")
-    selector_timeout: int = Field(default=15000, description="Selector wait timeout (ms)")
-    
+    selector_timeout: int = Field(
+        default=15000, description="Selector wait timeout (ms)"
+    )
+
     # Anti-detection
     user_agent_rotation: bool = Field(default=True, description="Rotate user agents")
     random_delays: bool = Field(default=True, description="Use random delays")
-    
+
     # Validation
     min_price: float = Field(default=100.0, description="Minimum valid price")
     max_price: float = Field(default=50000.0, description="Maximum valid price")
-    
+
     # Keywords
     unavailable_keywords: List[str] = Field(
         default=["indisponível", "esgotado", "avise-me", "out of stock"],
-        description="Keywords indicating product unavailability"
+        description="Keywords indicating product unavailability",
     )
-    
+
     model_config = SettingsConfigDict(env_prefix="SCRAPER_", extra="ignore")
-    
+
     @field_validator("max_concurrent")
     @classmethod
     def validate_max_concurrent(cls, v: int) -> int:
@@ -72,47 +80,49 @@ class ScraperConfig(BaseSettings):
 
 class RedisConfig(BaseSettings):
     """Redis configuration"""
-    
+
     host: str = Field(default="localhost", description="Redis host")
     port: int = Field(default=6379, description="Redis port")
     db: int = Field(default=0, description="Redis database number")
     password: Optional[str] = Field(default=None, description="Redis password")
-    
+
     model_config = SettingsConfigDict(env_prefix="REDIS_", extra="ignore")
 
 
 class MonitoringConfig(BaseSettings):
     """Monitoring configuration"""
-    
+
     prometheus_port: int = Field(default=9090, description="Prometheus port")
     grafana_port: int = Field(default=3000, description="Grafana port")
     enable_metrics: bool = Field(default=True, description="Enable metrics collection")
-    
+
     model_config = SettingsConfigDict(env_prefix="MONITORING_", extra="ignore")
 
 
 class AppConfig(BaseSettings):
     """Main application configuration"""
-    
-    env: str = Field(default="development", description="Environment (development/production)")
+
+    env: str = Field(
+        default="development", description="Environment (development/production)"
+    )
     debug: bool = Field(default=True, description="Debug mode")
     log_level: str = Field(default="INFO", description="Logging level")
-    
+
     # Sub-configurations
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
     api: APIConfig = Field(default_factory=APIConfig)
     scraper: ScraperConfig = Field(default_factory=ScraperConfig)
     redis: RedisConfig = Field(default_factory=RedisConfig)
     monitoring: MonitoringConfig = Field(default_factory=MonitoringConfig)
-    
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
         env_prefix="APP_",
-        extra="ignore"
+        extra="ignore",
     )
-    
+
     @field_validator("log_level")
     @classmethod
     def validate_log_level(cls, v: str) -> str:
@@ -130,7 +140,7 @@ _config: Optional[AppConfig] = None
 def get_config() -> AppConfig:
     """
     Get the global configuration instance (singleton pattern)
-    
+
     Returns:
         AppConfig instance
     """
@@ -143,7 +153,7 @@ def get_config() -> AppConfig:
 def reload_config() -> AppConfig:
     """
     Reload configuration from environment
-    
+
     Returns:
         New AppConfig instance
     """
@@ -156,15 +166,36 @@ def reload_config() -> AppConfig:
 STORE_URLS = {
     "pichau": "https://www.pichau.com.br/hardware/placa-de-video",
     "kabum": "https://www.kabum.com.br/hardware/placa-de-video-vga",
-    "terabyte": "https://www.terabyteshop.com.br/hardware/placas-de-video"
+    "terabyte": "https://www.terabyteshop.com.br/hardware/placas-de-video",
 }
 
 # Known GPU manufacturers
 KNOWN_MANUFACTURERS = [
-    "ASUS", "MSI", "GIGABYTE", "GALAX", "XFX", "ASROCK", "ZOTAC", "PNY",
-    "POWERCOLOR", "SAPPHIRE", "COLORFUL", "INNO3D", "PALIT", "EVGA",
-    "PCYES", "MANCER", "GAINWARD", "AFOX", "BIOSTAR", "MANLI",
-    "MAXSUN", "LEADTEK", "SPARKLE", "SUPERFRAME", "DUEX"
+    "ASUS",
+    "MSI",
+    "GIGABYTE",
+    "GALAX",
+    "XFX",
+    "ASROCK",
+    "ZOTAC",
+    "PNY",
+    "POWERCOLOR",
+    "SAPPHIRE",
+    "COLORFUL",
+    "INNO3D",
+    "PALIT",
+    "EVGA",
+    "PCYES",
+    "MANCER",
+    "GAINWARD",
+    "AFOX",
+    "BIOSTAR",
+    "MANLI",
+    "MAXSUN",
+    "LEADTEK",
+    "SPARKLE",
+    "SUPERFRAME",
+    "DUEX",
 ]
 
 # User agents for rotation
@@ -188,8 +219,8 @@ VIEWPORTS = [
 
 # Brazilian timezones with coordinates
 TIMEZONES = [
-    ('America/Sao_Paulo', -23.5505, -46.6333, 'São Paulo'),
-    ('America/Sao_Paulo', -22.9068, -43.1729, 'Rio de Janeiro'),
-    ('America/Fortaleza', -3.7172, -38.5433, 'Fortaleza'),
-    ('America/Manaus', -3.1190, -60.0217, 'Manaus'),
+    ("America/Sao_Paulo", -23.5505, -46.6333, "São Paulo"),
+    ("America/Sao_Paulo", -22.9068, -43.1729, "Rio de Janeiro"),
+    ("America/Fortaleza", -3.7172, -38.5433, "Fortaleza"),
+    ("America/Manaus", -3.1190, -60.0217, "Manaus"),
 ]

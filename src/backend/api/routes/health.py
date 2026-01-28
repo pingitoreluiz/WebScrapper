@@ -21,13 +21,13 @@ router = APIRouter()
 async def health_check():
     """
     Health check endpoint
-    
+
     Returns basic application status.
     """
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
-        "version": "2.0.0"
+        "version": "2.0.0",
     }
 
 
@@ -35,14 +35,14 @@ async def health_check():
 async def detailed_health_check(db: Session = Depends(get_db)):
     """
     Detailed health check
-    
+
     Includes database connectivity and statistics.
     """
     try:
         # Check database
         repo = ProductRepository(db)
         stats = repo.get_stats()
-        
+
         return {
             "status": "healthy",
             "timestamp": datetime.now().isoformat(),
@@ -50,8 +50,8 @@ async def detailed_health_check(db: Session = Depends(get_db)):
             "database": {
                 "status": "connected",
                 "total_products": stats["total_products"],
-                "latest_scrape": stats["latest_scrape"]
-            }
+                "latest_scrape": stats["latest_scrape"],
+            },
         }
     except Exception as e:
         logger.error("health_check_failed", error=str(e))
@@ -59,8 +59,5 @@ async def detailed_health_check(db: Session = Depends(get_db)):
             "status": "unhealthy",
             "timestamp": datetime.now().isoformat(),
             "version": "2.0.0",
-            "database": {
-                "status": "error",
-                "error": str(e)
-            }
+            "database": {"status": "error", "error": str(e)},
         }

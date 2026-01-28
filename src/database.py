@@ -14,6 +14,7 @@ if not os.path.exists(DATA_DIR):
 
 DB_NAME = os.path.join(DATA_DIR, "prices.db")
 
+
 def get_connection():
     """Cria uma conexão com o arquivo do banco de dados."""
     return sqlite3.connect(DB_NAME)
@@ -26,7 +27,7 @@ def create_table():
     """
     conn = get_connection()
     cursor = conn.cursor()
-    
+
     # Cria tabela principal
     sql_command = """
     CREATE TABLE IF NOT EXISTS prices (
@@ -43,9 +44,9 @@ def create_table():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """
-    
+
     cursor.execute(sql_command)
-    
+
     # Cria índices para queries rápidas
     indices = [
         "CREATE INDEX IF NOT EXISTS idx_loja ON prices(loja)",
@@ -56,10 +57,10 @@ def create_table():
         "CREATE INDEX IF NOT EXISTS idx_data_coleta ON prices(data_coleta)",
         "CREATE INDEX IF NOT EXISTS idx_link ON prices(link)",
     ]
-    
+
     for index_sql in indices:
         cursor.execute(index_sql)
-    
+
     conn.commit()
     conn.close()
     print("[OK] Tabela 'prices' e indices criados/verificados com sucesso.")
@@ -69,16 +70,16 @@ def save_price(data_dict):
     """
     Salva um único produto no banco de dados.
     Usa INSERT OR REPLACE para evitar duplicatas baseado no link.
-    
+
     Args:
         data_dict: Dicionário com dados do produto
-        
+
     Returns:
         Boolean indicando sucesso
     """
     conn = get_connection()
     cursor = conn.cursor()
-    
+
     # SQL com INSERT OR REPLACE para evitar duplicatas
     sql_command = """
     INSERT OR REPLACE INTO prices (
@@ -86,7 +87,7 @@ def save_price(data_dict):
         fabricante, modelo, link, data_coleta, loja
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
-    
+
     values = (
         data_dict.get("Produto"),
         data_dict.get("Preco_Original"),
@@ -96,9 +97,9 @@ def save_price(data_dict):
         data_dict.get("Modelo"),
         data_dict.get("Link"),
         data_dict.get("Data_Coleta"),
-        data_dict.get("Loja", "Desconhecida")
+        data_dict.get("Loja", "Desconhecida"),
     )
-    
+
     try:
         cursor.execute(sql_command, values)
         conn.commit()
@@ -113,42 +114,44 @@ def save_price(data_dict):
 def get_stats():
     """
     Retorna estatísticas do banco de dados
-    
+
     Returns:
         Dicionário com estatísticas
     """
     conn = get_connection()
     cursor = conn.cursor()
-    
+
     stats = {}
-    
+
     # Total de produtos
     cursor.execute("SELECT COUNT(*) FROM prices")
-    stats['total_produtos'] = cursor.fetchone()[0]
-    
+    stats["total_produtos"] = cursor.fetchone()[0]
+
     # Produtos por loja
     cursor.execute("SELECT loja, COUNT(*) FROM prices GROUP BY loja")
-    stats['por_loja'] = dict(cursor.fetchall())
-    
+    stats["por_loja"] = dict(cursor.fetchall())
+
     # Produtos por marca de chip
     cursor.execute("SELECT marca_chip, COUNT(*) FROM prices GROUP BY marca_chip")
-    stats['por_chip'] = dict(cursor.fetchall())
-    
+    stats["por_chip"] = dict(cursor.fetchall())
+
     # Preço médio
     cursor.execute("SELECT AVG(preco_numerico) FROM prices WHERE preco_numerico > 0")
     avg_price = cursor.fetchone()[0]
-    stats['preco_medio'] = f"R$ {avg_price:.2f}" if avg_price else "N/A"
-    
+    stats["preco_medio"] = f"R$ {avg_price:.2f}" if avg_price else "N/A"
+
     # Preço mínimo e máximo
-    cursor.execute("SELECT MIN(preco_numerico), MAX(preco_numerico) FROM prices WHERE preco_numerico > 0")
+    cursor.execute(
+        "SELECT MIN(preco_numerico), MAX(preco_numerico) FROM prices WHERE preco_numerico > 0"
+    )
     min_price, max_price = cursor.fetchone()
-    stats['preco_minimo'] = f"R$ {min_price:.2f}" if min_price else "N/A"
-    stats['preco_maximo'] = f"R$ {max_price:.2f}" if max_price else "N/A"
-    
+    stats["preco_minimo"] = f"R$ {min_price:.2f}" if min_price else "N/A"
+    stats["preco_maximo"] = f"R$ {max_price:.2f}" if max_price else "N/A"
+
     # Última coleta
     cursor.execute("SELECT MAX(data_coleta) FROM prices")
-    stats['ultima_coleta'] = cursor.fetchone()[0] or "N/A"
-    
+    stats["ultima_coleta"] = cursor.fetchone()[0] or "N/A"
+
     conn.close()
     return stats
 
@@ -156,31 +159,31 @@ def get_stats():
 def export_to_csv(output_file=None):
     """
     Exporta dados do banco para CSV
-    
+
     Args:
         output_file: Caminho do arquivo de saída (opcional)
-        
+
     Returns:
         Caminho do arquivo gerado
     """
     if output_file is None:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_file = os.path.join(DATA_DIR, f"export_{timestamp}.csv")
-    
+
     conn = get_connection()
     cursor = conn.cursor()
-    
+
     cursor.execute("SELECT * FROM prices ORDER BY loja, preco_numerico")
     rows = cursor.fetchall()
-    
+
     # Pega nomes das colunas
     column_names = [description[0] for description in cursor.description]
-    
-    with open(output_file, 'w', newline='', encoding='utf-8') as f:
+
+    with open(output_file, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(column_names)
         writer.writerows(rows)
-    
+
     conn.close()
     print(f"✅ Dados exportados para: {output_file}")
     return output_file
@@ -189,34 +192,34 @@ def export_to_csv(output_file=None):
 def export_to_json(output_file=None):
     """
     Exporta dados do banco para JSON
-    
+
     Args:
         output_file: Caminho do arquivo de saída (opcional)
-        
+
     Returns:
         Caminho do arquivo gerado
     """
     if output_file is None:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_file = os.path.join(DATA_DIR, f"export_{timestamp}.json")
-    
+
     conn = get_connection()
     cursor = conn.cursor()
-    
+
     cursor.execute("SELECT * FROM prices ORDER BY loja, preco_numerico")
     rows = cursor.fetchall()
-    
+
     # Pega nomes das colunas
     column_names = [description[0] for description in cursor.description]
-    
+
     # Converte para lista de dicionários
     data = []
     for row in rows:
         data.append(dict(zip(column_names, row)))
-    
-    with open(output_file, 'w', encoding='utf-8') as f:
+
+    with open(output_file, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-    
+
     conn.close()
     print(f"✅ Dados exportados para: {output_file}")
     return output_file
@@ -225,17 +228,17 @@ def export_to_json(output_file=None):
 def get_best_prices(limit=10, chip_brand=None):
     """
     Retorna os melhores preços
-    
+
     Args:
         limit: Número de resultados
         chip_brand: Filtrar por marca de chip (NVIDIA, AMD, INTEL)
-        
+
     Returns:
         Lista de tuplas com dados dos produtos
     """
     conn = get_connection()
     cursor = conn.cursor()
-    
+
     if chip_brand:
         sql = """
         SELECT produto, preco_numerico, loja, link, modelo
@@ -254,7 +257,7 @@ def get_best_prices(limit=10, chip_brand=None):
         LIMIT ?
         """
         cursor.execute(sql, (limit,))
-    
+
     results = cursor.fetchall()
     conn.close()
     return results
@@ -263,17 +266,17 @@ def get_best_prices(limit=10, chip_brand=None):
 def search_products(query, limit=20):
     """
     Busca produtos por termo
-    
+
     Args:
         query: Termo de busca
         limit: Número máximo de resultados
-        
+
     Returns:
         Lista de tuplas com dados dos produtos
     """
     conn = get_connection()
     cursor = conn.cursor()
-    
+
     sql = """
     SELECT produto, preco_numerico, loja, link, modelo, fabricante
     FROM prices 
@@ -281,10 +284,10 @@ def search_products(query, limit=20):
     ORDER BY preco_numerico ASC
     LIMIT ?
     """
-    
+
     search_term = f"%{query}%"
     cursor.execute(sql, (search_term, search_term, search_term, limit))
-    
+
     results = cursor.fetchall()
     conn.close()
     return results
@@ -293,27 +296,28 @@ def search_products(query, limit=20):
 def clear_old_data(days=30):
     """
     Remove dados antigos do banco
-    
+
     Args:
         days: Número de dias para manter
-        
+
     Returns:
         Número de registros removidos
     """
     conn = get_connection()
     cursor = conn.cursor()
-    
+
     # SQLite não tem função DATE_SUB, então usamos data como string
     from datetime import timedelta
+
     cutoff_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
-    
+
     cursor.execute("SELECT COUNT(*) FROM prices WHERE data_coleta < ?", (cutoff_date,))
     count = cursor.fetchone()[0]
-    
+
     cursor.execute("DELETE FROM prices WHERE data_coleta < ?", (cutoff_date,))
     conn.commit()
     conn.close()
-    
+
     print(f"[CLEANUP] Removidos {count} registros antigos (>{days} dias)")
     return count
 

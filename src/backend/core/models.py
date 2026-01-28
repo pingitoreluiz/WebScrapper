@@ -14,6 +14,7 @@ from pydantic import BaseModel, HttpUrl, Field, field_validator
 
 class ChipBrand(str, Enum):
     """GPU Chip manufacturers"""
+
     NVIDIA = "NVIDIA"
     AMD = "AMD"
     INTEL = "INTEL"
@@ -22,6 +23,7 @@ class ChipBrand(str, Enum):
 
 class Store(str, Enum):
     """Supported stores"""
+
     PICHAU = "Pichau"
     KABUM = "Kabum"
     TERABYTE = "Terabyte"
@@ -30,27 +32,28 @@ class Store(str, Enum):
 class Price(BaseModel):
     """
     Value object for prices with validation
-    
+
     Attributes:
         raw: Original price string (e.g., "R$ 2.500,00")
         value: Numeric value as Decimal
         currency: Currency code (default: BRL)
     """
+
     raw: str
     value: Decimal
     currency: str = "BRL"
-    
+
     @classmethod
     def from_string(cls, price_str: str) -> "Price":
         """
         Create Price from Brazilian format string
-        
+
         Args:
             price_str: Price string like "R$ 2.500,00"
-            
+
         Returns:
             Price instance
-            
+
         Example:
             >>> price = Price.from_string("R$ 1.234,56")
             >>> price.value
@@ -59,7 +62,7 @@ class Price(BaseModel):
         # Remove R$, convert thousands separator and decimal separator
         cleaned = price_str.replace("R$", "").replace(".", "").replace(",", ".").strip()
         return cls(raw=price_str, value=Decimal(cleaned))
-    
+
     @field_validator("value")
     @classmethod
     def validate_price_range(cls, v: Decimal) -> Decimal:
@@ -67,10 +70,10 @@ class Price(BaseModel):
         if v < 100 or v > 50000:
             raise ValueError(f"Price {v} out of valid range (100-50000)")
         return v
-    
+
     def __str__(self) -> str:
         return self.raw
-    
+
     def __float__(self) -> float:
         return float(self.value)
 
@@ -78,18 +81,19 @@ class Price(BaseModel):
 class RawProduct(BaseModel):
     """
     Raw product data extracted from scraping (before enrichment)
-    
+
     Attributes:
         title: Product title/name
         price: Product price
         url: Product URL
         store: Store name
     """
+
     title: str = Field(..., min_length=5, max_length=500)
     price: Price
     url: HttpUrl
     store: Store
-    
+
     @field_validator("title")
     @classmethod
     def validate_title(cls, v: str) -> str:
@@ -97,43 +101,46 @@ class RawProduct(BaseModel):
         if not v.strip():
             raise ValueError("Title cannot be empty")
         return v.strip()
-    
+
     model_config = {"frozen": False}
 
 
 class EnrichedProduct(RawProduct):
     """
     Product with enriched metadata
-    
+
     Adds chip brand, manufacturer, and model information to raw product.
     """
+
     chip_brand: ChipBrand
     manufacturer: str = Field(..., min_length=2, max_length=100)
     model: str = Field(..., min_length=2, max_length=100)
     scraped_at: datetime = Field(default_factory=datetime.now)
-    
+
     model_config = {"frozen": False}
 
 
 class ProductInDB(EnrichedProduct):
     """
     Product as stored in database
-    
+
     Adds database-specific fields like ID and timestamps.
     """
+
     id: Optional[int] = None
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
-    
+
     model_config = {"from_attributes": True}
 
 
 class ProductResponse(BaseModel):
     """
     Product response for API
-    
+
     Simplified view of product for API responses.
     """
+
     id: int
     title: str
     price: float
@@ -144,7 +151,7 @@ class ProductResponse(BaseModel):
     store: Store
     url: str
     scraped_at: datetime
-    
+
     @classmethod
     def from_db_model(cls, product: ProductInDB) -> "ProductResponse":
         """Create API response from database model"""
@@ -158,18 +165,19 @@ class ProductResponse(BaseModel):
             model=product.model,
             store=product.store,
             url=str(product.url),
-            scraped_at=product.scraped_at
+            scraped_at=product.scraped_at,
         )
-    
+
     model_config = {"from_attributes": True}
 
 
 class ScraperMetrics(BaseModel):
     """
     Metrics collected during scraper execution
-    
+
     Tracks performance and results of scraping operations.
     """
+
     store: Store
     pages_scraped: int = 0
     products_found: int = 0
@@ -181,13 +189,13 @@ class ScraperMetrics(BaseModel):
     execution_time: float = 0.0
     started_at: datetime = Field(default_factory=datetime.now)
     finished_at: Optional[datetime] = None
-    
+
     def success_rate(self) -> float:
         """Calculate success rate (saved/found)"""
         if self.products_found == 0:
             return 0.0
         return (self.products_saved / self.products_found) * 100
-    
+
     def to_dict(self) -> dict:
         """Convert to dictionary for logging"""
         return {
@@ -200,7 +208,7 @@ class ScraperMetrics(BaseModel):
             "captchas_detected": self.captchas_detected,
             "unavailable_count": self.unavailable_count,
             "execution_time": round(self.execution_time, 2),
-            "success_rate": round(self.success_rate(), 2)
+            "success_rate": round(self.success_rate(), 2),
         }
 
 
@@ -208,6 +216,7 @@ class ScraperRun(BaseModel):
     """
     Scraper run details
     """
+
     id: int
     store: Store
     products_saved: int
@@ -215,12 +224,13 @@ class ScraperRun(BaseModel):
     success: bool
     started_at: datetime
     finished_at: Optional[datetime] = None
-    
+
     model_config = {"from_attributes": True}
 
 
 class ScraperRunRequest(BaseModel):
     """Request to run a scraper"""
+
     stores: list[Store] = Field(default=[Store.PICHAU, Store.KABUM, Store.TERABYTE])
     headless: bool = True
     max_pages: Optional[int] = None
@@ -228,6 +238,7 @@ class ScraperRunRequest(BaseModel):
 
 class ScraperRunResponse(BaseModel):
     """Response from scraper execution"""
+
     success: bool
     message: str
     metrics: list[ScraperMetrics]
@@ -237,6 +248,7 @@ class ScraperRunResponse(BaseModel):
 
 class PriceHistoryPoint(BaseModel):
     """Single point in price history"""
+
     date: datetime
     price: float
     store: Store
@@ -244,6 +256,7 @@ class PriceHistoryPoint(BaseModel):
 
 class ProductSearchQuery(BaseModel):
     """Product search query parameters"""
+
     query: Optional[str] = None
     chip_brand: Optional[ChipBrand] = None
     manufacturer: Optional[str] = None
@@ -260,6 +273,7 @@ class AnalyticsHistoryPoint(BaseModel):
     """
     Data point for price history chart.
     """
+
     date: str  # ISO Format YYYY-MM-DD
     average_price: float
     min_price: float
@@ -269,6 +283,7 @@ class AnalyticsStoreComparison(BaseModel):
     """
     Data point for store comparison chart.
     """
+
     store: Store
     product_count: int
     average_price: float

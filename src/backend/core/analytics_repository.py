@@ -31,7 +31,7 @@ class AnalyticsRepository:
             self.session.query(
                 func.date(Product.scraped_at).label("date"),
                 func.avg(Product.price_value).label("avg_price"),
-                func.min(Product.price_value).label("min_price")
+                func.min(Product.price_value).label("min_price"),
             )
             .filter(Product.scraped_at >= cutoff_date)
             .filter(Product.price_value > 0)
@@ -44,7 +44,7 @@ class AnalyticsRepository:
             AnalyticsHistoryPoint(
                 date=str(stat.date),
                 average_price=float(stat.avg_price or 0.0),
-                min_price=float(stat.min_price or 0.0)
+                min_price=float(stat.min_price or 0.0),
             )
             for stat in stats
         ]
@@ -58,7 +58,7 @@ class AnalyticsRepository:
                 Product.store,
                 func.count(Product.id).label("count"),
                 func.avg(Product.price_value).label("avg_price"),
-                func.min(Product.price_value).label("min_price")
+                func.min(Product.price_value).label("min_price"),
             )
             .filter(Product.price_value > 0)
             .group_by(Product.store)
@@ -70,7 +70,7 @@ class AnalyticsRepository:
                 store=Store(stat.store),
                 product_count=stat.count,
                 average_price=float(stat.avg_price or 0.0),
-                cheapest_product_price=float(stat.min_price or 0.0)
+                cheapest_product_price=float(stat.min_price or 0.0),
             )
             for stat in stats
         ]
