@@ -106,14 +106,14 @@ class APIClient {
      * @param {number} days - Number of days
      */
     async getAnalyticsHistory(days = 30) {
-        return this.request(`/analytics/history?days=${days}`);
+        return this.request(`/api/v1/analytics/history?days=${days}`);
     }
 
     /**
      * Get store comparison stats
      */
     async getAnalyticsComparison() {
-        return this.request(`/analytics/comparison`);
+        return this.request(`/api/v1/analytics/comparison`);
     }
 }
 
