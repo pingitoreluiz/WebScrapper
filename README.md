@@ -2,7 +2,13 @@
 
 A robust, containerized web scraper for monitoring GPU prices across major Brazilian retailers (Pichau, Kabum, Terabyte). Built with FastAPI, Playwright, and Vanilla JS.
 
-![Dashboard Preview](docs/dashboard-preview.png)
+![Dashboard Preview](docs/Dashboard.png)
+
+## 📸 Screenshots
+
+|       Products & Filters       |        Analytics & Trends        |
+| :----------------------------: | :------------------------------: |
+| ![Products](docs/Produtos.png) | ![Analytics](docs/Analytics.png) |
 
 ## 🚀 Features
 
@@ -56,7 +62,7 @@ A robust, containerized web scraper for monitoring GPU prices across major Brazi
 
 ## 📂 Project Structure
 
-```
+```text
 ├── data/               # Database storage (mounted volume)
 ├── logs/               # Application logs (mounted volume)
 ├── scripts/            # Helper scripts (e.g., verification)

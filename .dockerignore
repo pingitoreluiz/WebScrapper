@@ -1,24 +1,26 @@
+# Version Control
 .git
 .gitignore
-.dockerignore
-venv
-.venv
-__pycache__
-*.pyc
-*.pyo
-*.pyd
-.Python
-env
+
+# Environment
 .env
-.env.production
-.env.test
-docs
-tests
-scripts
-logs
-data
-payload.json
-products_dump.html
-README.md
-CHANGELOG.md
-CONTRIBUTING.md
+.venv
+venv/
+__pycache__/
+*.pyc
+
+# Tests
+tests/
+test_output.txt
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# IDE
+.vscode/
+.idea/
+
+# Logs & Data
+logs/
+data/
