@@ -49,6 +49,12 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov
       
+      - name: Ensure database directory exists
+        run: mkdir -p data
+
+      - name: Install Playwright browsers
+        run: playwright install
+      
       - name: Run tests with coverage
         run: |
           python -m pytest tests/ -v --cov=src --cov-report=xml --cov-report=term
