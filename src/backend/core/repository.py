@@ -91,6 +91,27 @@ class ProductRepository:
         product = self.session.query(Product).filter(Product.id == product_id).first()
         return self._to_product_in_db(product) if product else None
 
+    def get_all(self, limit: Optional[int] = None, offset: int = 0) -> List[ProductInDB]:
+        """
+        Get all products with optional pagination
+        
+        Args:
+            limit: Maximum number of products to return (None for all)
+            offset: Number of products to skip
+            
+        Returns:
+            List of ProductInDB ordered by scraped_at descending
+        """
+        query = self.session.query(Product).order_by(desc(Product.scraped_at))
+        
+        if offset:
+            query = query.offset(offset)
+        if limit:
+            query = query.limit(limit)
+            
+        products = query.all()
+        return [self._to_product_in_db(p) for p in products]
+
     def search(self, query: ProductSearchQuery) -> List[ProductInDB]:
         """
         Search products with filters
