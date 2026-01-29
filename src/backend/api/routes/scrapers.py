@@ -99,12 +99,51 @@ async def run_scrapers(
     )
 
 
-@router.get("/history", response_model=List[ScraperRun])
+@router.get("/status")
+async def get_scraper_status():
+    """Get scraper scheduler status"""
+    try:
+        scheduler = get_scheduler()
+        return {
+            "scheduler_running": scheduler.scheduler.running if scheduler else False,
+            "active_jobs": scheduler.get_jobs() if scheduler else []
+        }
+    except Exception:
+        return {
+            "scheduler_running": False,
+            "active_jobs": []
+        }
+
+
+@router.get("/history")
 async def get_recent_runs(limit: int = 10, db: Session = Depends(get_db)):
     """Get recent scraper runs"""
     repo = ScraperRunRepository(db)
     runs = repo.get_recent_runs(limit)
-    return runs
+    
+    # Convert SQLAlchemy models to dicts to avoid recursion
+    runs_data = []
+    for run in runs:
+        runs_data.append({
+            "id": run.id,
+            "store": run.store,
+            "started_at": run.started_at.isoformat() if run.started_at else None,
+            "finished_at": run.finished_at.isoformat() if run.finished_at else None,
+            "execution_time": run.execution_time,
+            "products_found": run.products_found,
+            "products_saved": run.products_saved,
+            "products_skipped": run.products_skipped,
+            "pages_scraped": run.pages_scraped,
+            "errors": run.errors,
+            "captchas_detected": run.captchas_detected,
+            "success": run.success,
+            "error_message": run.error_message
+        })
+    
+    return {
+        "total": len(runs_data),
+        "runs": runs_data
+    }
 
 
 @router.get("/metrics")

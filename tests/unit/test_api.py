@@ -203,7 +203,8 @@ class TestScraperEndpoints:
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is True
-        assert data["total_products_saved"] == 10
+        # Background task returns 0 immediately, actual results come later
+        assert data["total_products_saved"] == 0
 
     @patch("src.backend.api.routes.scrapers.get_scheduler")
     def test_get_scraper_status(self, mock_get_scheduler, client):
@@ -228,8 +229,14 @@ class TestScraperEndpoints:
         mock_run.id = 1
         mock_run.store = "Pichau"
         mock_run.products_saved = 10
+        mock_run.products_found = 15
+        mock_run.products_skipped = 5
+        mock_run.pages_scraped = 2
+        mock_run.errors = 0
+        mock_run.captchas_detected = 0
         mock_run.execution_time = 5.0
         mock_run.success = True
+        mock_run.error_message = None
         mock_run.started_at = datetime.now()
         mock_run.finished_at = datetime.now()
 

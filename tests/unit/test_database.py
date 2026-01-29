@@ -148,6 +148,11 @@ class TestProductRepository:
     def test_get_best_deals(self, db_session):
         """Test getting best deals"""
         repo = ProductRepository(db_session)
+        
+        # Clear any existing products to ensure test isolation
+        from src.backend.core.database_models import Product
+        db_session.query(Product).delete()
+        db_session.commit()
 
         # Create multiple products
         products = [

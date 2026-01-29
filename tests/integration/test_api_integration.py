@@ -153,9 +153,11 @@ class TestScraperEndpoints:
         assert response.status_code == 200
         data = response.json()
 
-        assert isinstance(data, list)
-        assert len(data) > 0
-        assert data[0]["store"] == "Pichau"
+        assert isinstance(data, dict)
+        assert "total" in data
+        assert "runs" in data
+        assert len(data["runs"]) > 0
+        assert data["runs"][0]["store"] == "Pichau"
 
     def test_scraper_metrics(self, client, sample_scraper_run):
         """Test getting scraper metrics"""
