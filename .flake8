@@ -1,0 +1,31 @@
+[flake8]
+max-line-length = 100
+exclude = 
+    .git,
+    __pycache__,
+    .pytest_cache,
+    venv,
+    env,
+    .venv,
+    htmlcov,
+    .tox,
+    dist,
+    build,
+    *.egg-info
+
+# Ignore specific error codes
+ignore = 
+    # F401: imported but unused (many are used in type hints or future code)
+    F401,
+    # E722: bare except (used intentionally for broad error handling)
+    E722,
+    # F841: local variable assigned but never used (sometimes needed for unpacking)
+    F841,
+    # W293: blank line contains whitespace (not critical)
+    W293,
+    # F811: redefinition of unused name (happens with conditional imports)
+    F811
+
+# Per-file ignores
+per-file-ignores =
+    __init__.py:F401
