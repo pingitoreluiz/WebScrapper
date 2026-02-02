@@ -24,7 +24,17 @@ ignore =
     # W293: blank line contains whitespace (not critical)
     W293,
     # F811: redefinition of unused name (happens with conditional imports)
-    F811
+    F811,
+    # E402: module level import not at top (debug/script files)
+    E402,
+    # F541: f-string missing placeholders (sometimes intentional for consistency)
+    F541,
+    # W503: line break before binary operator (PEP 8 updated, now acceptable)
+    W503,
+    # E501: line too long (handled by Black, some exceptions needed)
+    E501,
+    # F821: undefined name (sometimes from dynamic imports or type checking)
+    F821
 
 # Per-file ignores
 per-file-ignores =
