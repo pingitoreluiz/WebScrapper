@@ -35,14 +35,14 @@ class Product:
         updated_at: When this product was last updated
     """
     
-    # Identity
-    id: UUID = field(default_factory=uuid4)
-    
-    # Core attributes
+    # Core attributes (required)
     title: str
     price: Price
     url: ProductUrl
     store: str
+    
+    # Identity (has default)
+    id: UUID = field(default_factory=uuid4)
     
     # Optional attributes
     chip_brand: Optional[str] = None

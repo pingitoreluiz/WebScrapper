@@ -36,14 +36,14 @@ class ScraperRun:
         products: List of products scraped (optional)
     """
     
-    # Identity
+    # Core attributes (required)
+    store: str
+    
+    # Identity (has default)
     id: UUID = field(default_factory=uuid4)
     
-    # Core attributes
-    store: str
+    # Timing
     started_at: datetime = field(default_factory=datetime.utcnow)
-    
-    # Completion info
     finished_at: Optional[datetime] = None
     execution_time: float = 0.0
     
