@@ -11,7 +11,6 @@ from src.backend.core.models import Store
 from src.backend.core.database_models import Product
 
 
-
 @pytest.fixture
 def client(db_session):
     """Create test client with database"""

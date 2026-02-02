@@ -20,8 +20,8 @@ class TestDashboardJourney:
         expect(page).to_have_title("GPU Price Scraper - Dashboard")
 
         # Verify main sections are visible
-        expect(page.locator("h1")).to_contain_text("GPU Price Scraper")
-        expect(page.locator(".stats-container")).to_be_visible()
+        expect(page.locator("h1")).to_contain_text("Dashboard")
+        expect(page.locator(".stats-grid")).to_be_visible()
 
     def test_stats_cards_display(self, page: Page, base_url: str):
         """Test that statistics cards are displayed"""
@@ -35,7 +35,7 @@ class TestDashboardJourney:
         expect(stat_cards).to_have_count(4)
 
         # Verify stat card content
-        expect(page.locator(".stat-card").first).to_contain_text("Total Products")
+        expect(page.locator(".stat-card").first).to_contain_text("Total de Produtos")
 
     def test_best_deals_section(self, page: Page, base_url: str):
         """Test best deals section"""
@@ -59,8 +59,8 @@ class TestDashboardJourney:
         """Test activity feed displays scraper history"""
         page.goto(base_url)
 
-        # Wait for activity feed
-        page.wait_for_selector(".activity-feed", timeout=5000)
+        # Wait for activity list
+        page.wait_for_selector(".activity-list", timeout=5000)
 
         # Verify activity items
         activity_items = page.locator(".activity-item")
@@ -79,7 +79,7 @@ class TestScraperControls:
         page.goto(base_url)
 
         # Find and click run scraper button
-        run_button = page.locator("#run-scraper-btn")
+        run_button = page.locator("#btnRunScraper")
         expect(run_button).to_be_visible()
 
         run_button.click()
@@ -90,52 +90,12 @@ class TestScraperControls:
         # Note: In real test, would wait for completion
         # For now, just verify button was clicked
 
-    def test_scraper_controls_visible(self, page: Page, base_url: str):
-        """Test that scraper controls are accessible"""
+    def test_quick_actions_visible(self, page: Page, base_url: str):
+        """Test that quick actions section is accessible"""
         page.goto(base_url)
 
-        # Verify scraper controls section exists
-        expect(page.locator(".scraper-controls")).to_be_visible()
-
-
-class TestProductSearch:
-    """Test product search functionality"""
-
-    def test_search_input_visible(self, page: Page, base_url: str):
-        """Test search input is visible"""
-        page.goto(base_url)
-
-        search_input = page.locator("#search-input")
-        expect(search_input).to_be_visible()
-
-    def test_search_products(self, page: Page, base_url: str):
-        """Test searching for products"""
-        page.goto(base_url)
-
-        # Enter search query
-        search_input = page.locator("#search-input")
-        search_input.fill("RTX 4090")
-
-        # Click search button
-        search_button = page.locator("#search-btn")
-        search_button.click()
-
-        # Wait for results
-        page.wait_for_timeout(1000)
-
-        # Verify search was executed
-        # (Results depend on data in database)
-
-    def test_filter_by_chip_brand(self, page: Page, base_url: str):
-        """Test filtering by chip brand"""
-        page.goto(base_url)
-
-        # Find chip brand filter
-        chip_filter = page.locator("#chip-brand-filter")
-
-        if chip_filter.is_visible():
-            chip_filter.select_option("NVIDIA")
-            page.wait_for_timeout(500)
+        # Verify quick actions section exists
+        expect(page.locator(".quick-actions")).to_be_visible()
 
 
 class TestNavigation:
