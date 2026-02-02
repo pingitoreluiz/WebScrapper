@@ -34,7 +34,13 @@ ignore =
     # E501: line too long (handled by Black, some exceptions needed)
     E501,
     # F821: undefined name (sometimes from dynamic imports or type checking)
-    F821
+    F821,
+    # E712: comparison to True (sometimes explicit is clearer)
+    E712,
+    # E203: whitespace before ':' (conflicts with Black formatting)
+    E203,
+    # W291: trailing whitespace (Black handles this)
+    W291
 
 # Per-file ignores
 per-file-ignores =
