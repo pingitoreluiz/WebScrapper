@@ -233,11 +233,18 @@ class ProductRepository:
 
         latest_scrape = self.session.query(func.max(Product.scraped_at)).scalar()
 
+        best_deals_count = (
+            self.session.query(func.count(Product.id))
+            .filter(Product.price_value > 0)
+            .scalar()
+        )
+
         return {
             "total_products": total or 0,
             "by_store": dict(by_store) if by_store else {},
             "by_chip_brand": dict(by_chip) if by_chip else {},
-            "avg_price": float(avg_price) if avg_price else 0.0,
+            "average_price": float(avg_price) if avg_price else 0.0,
+            "best_deals_count": best_deals_count or 0,
             "min_price": float(min_price) if min_price else 0.0,
             "max_price": float(max_price) if max_price else 0.0,
             "latest_scrape": latest_scrape.isoformat() if latest_scrape else None,

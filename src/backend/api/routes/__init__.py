@@ -1,5 +1,5 @@
 """API routes package"""
 
-from . import health, products, scrapers
+from . import health, products, scrapers, websocket
 
-__all__ = ["health", "products", "scrapers"]
+__all__ = ["health", "products", "scrapers", "websocket"]

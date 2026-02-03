@@ -137,9 +137,18 @@ class TestProductEndpoints:
         data = response.json()
 
         assert "total_products" in data
-        assert "avg_price" in data
+        assert "average_price" in data
+        assert "best_deals_count" in data
+        assert "min_price" in data
+        assert "max_price" in data
+        assert "latest_scrape" in data
         assert "by_store" in data
+
         assert data["total_products"] == 3
+        assert isinstance(data["average_price"], float)
+        assert isinstance(data["best_deals_count"], int)
+        assert isinstance(data["min_price"], float)
+        assert isinstance(data["max_price"], float)
 
 
 class TestScraperEndpoints:

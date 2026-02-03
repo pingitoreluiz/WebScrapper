@@ -16,7 +16,7 @@ def add_app_context(
     logger: logging.Logger, method_name: str, event_dict: EventDict
 ) -> EventDict:
     """Add application context to log entries"""
-    event_dict["app"] = "webscrapper"
+    event_dict["app"] = "webscraper"
     event_dict["version"] = "2.0.0"
     return event_dict
 
