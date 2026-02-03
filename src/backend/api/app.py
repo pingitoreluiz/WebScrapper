@@ -56,7 +56,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="WebScraper API",
         description="API for GPU price scraping and analytics",
-        version="2.0.0",
+        version="3.0.0",
         docs_url="/docs",
         redoc_url="/redoc",
         lifespan=lifespan,
