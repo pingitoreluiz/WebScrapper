@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-02-02
+
+### 🚀 Major Feature - Real-Time Updates
+
+Significant architecture upgrade to support real-time data streaming via WebSockets.
+
+### Added
+
+#### WebSockets & Real-Time
+
+- **Backend WebSocket Infrastructure**:
+  - `ConnectionManager` for handling multiple websocket connections
+  - New `/ws/dashboard` endpoint for real-time streaming
+  - Event broadcasting system (Singleton pattern)
+- **Frontend Real-Time**:
+  - `WebSocketManager` with automatic reconnection strategy
+  - Live status indicator (Online/Offline)
+  - Toast notifications for live events
+  - Dashboard auto-refresh on scraper completion
+- **Event System**:
+  - `scraper.started`: Push notification when scraping begins
+  - `scraper.progress`: Live progress updates (products found/saved)
+  - `scraper.completed`: Final summary statistics
+  - `product.new`: Instant notification when new products are found
+
+### Changed
+
+- Dashboard now connects automatically to WebSocket on load
+- `BaseScraper` updated to broadcast events during execution
+- UI feedback improved with connection status indicators
+
 ## [2.0.0] - 2026-01-26
 
 ### 🎉 Major Release - Production Ready
@@ -150,6 +181,7 @@ Complete rewrite and modernization of the GPU Price Scraper system.
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 3.0.0 | 2026-02-02 | Real-time WebSockets update |
 | 2.0.0 | 2026-01-26 | Complete rewrite - Production ready |
 | 1.0.0 | 2025-XX-XX | Initial release |
 
