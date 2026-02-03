@@ -40,7 +40,8 @@
             <!-- Page Header -->
             <div class="page-header">
                 <h1 class="page-title">Dashboard</h1>
-                <p class="page-subtitle">Visão geral do sistema de scraping de GPUs</p>
+                <p class="page-subtitle">Visão geral do sistema de scraping de GPUs <span id="ws-status"
+                        class="status-disconnected" title="Connection lost">🔴 OFFLINE</span></p>
             </div>
 
             <!-- Stats Grid -->
@@ -176,6 +177,7 @@
 
     <!-- Scripts -->
     <script src="js/api.js"></script>
+    <script src="js/websocket-manager.js"></script>
     <script src="js/dashboard.js"></script>
 </body>
 

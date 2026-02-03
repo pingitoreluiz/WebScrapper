@@ -17,6 +17,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadDashboardData();
     loadBestDeals();
     loadRecentActivity();
+
+    // Connect to WebSocket
+    if (window.wsManager) {
+        window.wsManager.connect();
+
+        // Listen for real-time events
+        window.addEventListener('scraper.progress', (e) => {
+            const data = e.detail;
+            showToast(`Scraping ${data.store}: ${data.current} produtos`, 'info');
+        });
+
+        window.addEventListener('product.new', (e) => {
+            const product = e.detail;
+            showToast(`Novo produto: ${product.title}`, 'success');
+            // Optimistically update stats if needed
+        });
+
+        window.addEventListener('scraper.completed', () => {
+            loadDashboardData();
+            loadRecentActivity();
+            showToast('Scraping concluído!', 'success');
+        });
+    }
 });
 
 /**

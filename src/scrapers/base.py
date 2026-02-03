@@ -25,6 +25,7 @@ from ..backend.core.models import (
     Price,
 )
 from ..utils.logger import get_logger
+from ..backend.api.websocket.manager import manager
 
 
 class BaseScraper(ABC):
@@ -96,6 +97,16 @@ class BaseScraper(ABC):
         """
         self.metrics.started_at = datetime.now()
         self.logger.info("scraper_started", store=self.get_store_name())
+        
+        # Emit WebSocket event
+        try:
+            await manager.broadcast({
+                "event": "scraper.started",
+                "timestamp": datetime.now(),
+                "data": {"store": self.get_store_name()}
+            })
+        except Exception as e:
+            self.logger.warning(f"failed_to_broadcast_start: {e}")
 
         try:
             # Setup phase
@@ -140,6 +151,16 @@ class BaseScraper(ABC):
                 ).total_seconds()
 
             self.logger.info("scraper_finished", **self.metrics.to_dict())
+
+            # Emit WebSocket event
+            try:
+                await manager.broadcast({
+                    "event": "scraper.completed",
+                    "timestamp": datetime.now(),
+                    "data": self.metrics.to_dict()
+                })
+            except Exception as e:
+                self.logger.warning(f"failed_to_broadcast_complete: {e}")
 
         return self.metrics
 
@@ -276,6 +297,21 @@ class BaseScraper(ABC):
         """
         url = self.build_url(page_num)
         self.logger.info("scraping_page", page=page_num, url=url)
+
+        # Emit WebSocket event
+        try:
+            await manager.broadcast({
+                "event": "scraper.progress",
+                "timestamp": datetime.now(),
+                "data": {
+                    "store": self.get_store_name(),
+                    "page": page_num,
+                    "products_found": self.metrics.products_found,
+                    "products_saved": self.metrics.products_saved
+                }
+            })
+        except Exception as e:
+            pass
 
         # Load page
         await self._load_page(url)
@@ -491,6 +527,21 @@ class BaseScraper(ABC):
                     title=saved_product.title[:30],
                     price=float(saved_product.price.value),
                 )
+
+                # Emit WebSocket event
+                try:
+                    await manager.broadcast({
+                        "event": "product.new",
+                        "timestamp": datetime.now(),
+                        "data": {
+                            "title": saved_product.title,
+                            "price": float(saved_product.price.value),
+                            "store": saved_product.store.value,
+                            "url": saved_product.url
+                        }
+                    })
+                except Exception as e:
+                    self.logger.warning(f"failed_to_broadcast_product: {e}")
 
             return True
 
