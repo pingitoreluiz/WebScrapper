@@ -5,7 +5,7 @@ Defines models used specifically by scrapers, separate from backend core models.
 """
 
 from dataclasses import dataclass, field
-from typing import Optional, Dict, List
+from typing import Any, Optional, Dict, List
 from datetime import datetime
 
 from ..backend.core.models import Store
@@ -134,7 +134,7 @@ class ExtractionResult:
     price_value: Optional[float] = None
     url: Optional[str] = None
     available: bool = True
-    extra_data: Dict[str, any] = field(default_factory=dict)
+    extra_data: Dict[str, Any] = field(default_factory=dict)
 
     def is_valid(self) -> bool:
         """Check if extraction has minimum required data"""

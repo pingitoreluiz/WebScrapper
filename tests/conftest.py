@@ -15,7 +15,7 @@ def setup_test_environment():
     """Setup test environment"""
     # Set test environment variables
     os.environ["APP_ENV"] = "testing"
-    os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+    os.environ["DB_URL"] = "sqlite:///:memory:"
     os.environ["LOG_LEVEL"] = "DEBUG"
 
     yield

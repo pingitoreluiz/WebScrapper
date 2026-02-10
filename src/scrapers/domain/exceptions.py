@@ -4,6 +4,8 @@ Custom exceptions for scrapers
 Defines specific exceptions for better error handling and control flow.
 """
 
+from typing import Any
+
 
 class ScraperError(Exception):
     """Base exception for all scraper errors"""
@@ -49,7 +51,7 @@ class ExtractionError(ScraperError):
 class ValidationError(ScraperError):
     """Raised when extracted data fails validation"""
 
-    def __init__(self, field: str, value: any, reason: str):
+    def __init__(self, field: str, value: Any, reason: str):
         self.field = field
         self.value = value
         self.reason = reason

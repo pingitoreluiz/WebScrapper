@@ -53,7 +53,7 @@ jobs:
         run: mkdir -p data
 
       - name: Install Playwright browsers
-        run: playwright install
+        run: playwright install --with-deps chromium
 
       - name: Start services and run tests
         env:
