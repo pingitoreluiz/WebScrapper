@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-02-09
+
+### 🏗️ Refactoring - Unificação da Camada de Banco de Dados
+
+Eliminação da dívida técnica causada pela coexistência de duas camadas de banco de dados (SQLite raw + SQLAlchemy ORM). Toda a lógica agora passa pela camada SQLAlchemy unificada.
+
+### Changed
+
+- **`src/main.py`**: Reescrito completamente para usar `ScraperFactory` (Factory Pattern) ao invés de instanciar scrapers diretamente. Agora usa `get_db_session()` + `ProductRepository` para todas as operações de banco.
+- **`src/backend/core/repository.py`**: Adicionados métodos `export_to_csv()` e `export_to_json()` ao `ProductRepository`, migrando a funcionalidade de exportação que antes existia na camada legada.
+
+### Removed
+
+- **`src/database.py`**: Removida camada legada de acesso direto ao SQLite via `sqlite3`. Toda funcionalidade (save, stats, search, export, cleanup) já existia no `ProductRepository` via SQLAlchemy ORM.
+- **`src/legacy_utils.py`**: Removidas utilidades legadas (`setup_logger`, `ColoredFormatter`, `clean_price`, `extract_chip_brand`, `extract_manufacturer`, `extract_model`, `validate_product_data`, `ProgressTracker`, `print_header`, `print_stats`, `format_duration`). O logging agora usa `src.utils.logger.get_logger` (structlog); funções de formatação foram incorporadas no `main.py`; funções de extração de dados não eram importadas por nenhum módulo ativo.
+
+### Technical Notes
+
+- **Zero breaking changes**: Todos os API routes e testes já usavam exclusivamente a camada SQLAlchemy — nenhuma alteração necessária.
+- **Dependências eliminadas**: `sqlite3` direto, `colorama` (via legacy_utils).
+- **Padrões utilizados**: Factory Pattern (ScraperFactory), Repository Pattern (ProductRepository), Singleton (get_db_session).
+
 ## [3.0.0] - 2026-02-02
 
 ### 🚀 Major Feature - Real-Time Updates

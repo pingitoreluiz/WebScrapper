@@ -1,26 +1,57 @@
-from playwright.sync_api import sync_playwright
-from src.scrapers.kabum import KabumScraper
-from src.scrapers.terabyte import TerabyteScraper
-from src.scrapers.pichau import PichauScraper
-import src.database as database
+"""
+GPU Price Scraper - CLI Entry Point
+
+Provides command-line interface for running scrapers, viewing stats, and exporting data.
+Uses ScraperFactory and SQLAlchemy ORM for all operations.
+"""
+
 import argparse
+import asyncio
 import sys
 from datetime import datetime
-from src.legacy_utils import setup_logger, print_header, print_stats, format_duration
+
+from src.scrapers.factory import ScraperFactory
+from src.backend.core.models import Store
+from src.backend.core.database import create_tables, get_db_session
+from src.backend.core.repository import ProductRepository
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+
+def _format_duration(seconds: float) -> str:
+    """Format duration in seconds to readable string"""
+    if seconds < 60:
+        return f"{seconds:.0f}s"
+    elif seconds < 3600:
+        minutes = seconds // 60
+        secs = seconds % 60
+        return f"{minutes:.0f}m {secs:.0f}s"
+    else:
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        return f"{hours:.0f}h {minutes:.0f}m"
+
+
+def _print_header(text: str, char: str = "=", width: int = 60) -> None:
+    """Print formatted header"""
+    print(char * width)
+    print(f"{text:^{width}}")
+    print(char * width)
 
 
 def parse_arguments():
-    """Parse argumentos da linha de comando"""
+    """Parse command line arguments"""
     parser = argparse.ArgumentParser(
         description="Scraper de preços de placas de vídeo de múltiplas lojas",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Exemplos de uso:
-  python main.py                          # Executa todos os scrapers
-  python main.py --scraper pichau         # Executa apenas Pichau
-  python main.py --scraper kabum terabyte # Executa Kabum e Terabyte
-  python main.py --headless               # Executa em modo headless
-  python main.py --export csv             # Exporta resultados para CSV após scraping
+  python -m src.main                          # Executa todos os scrapers
+  python -m src.main --scraper pichau         # Executa apenas Pichau
+  python -m src.main --scraper kabum terabyte # Executa Kabum e Terabyte
+  python -m src.main --headless               # Executa em modo headless
+  python -m src.main --export csv             # Exporta resultados para CSV após scraping
         """,
     )
 
@@ -52,79 +83,71 @@ Exemplos de uso:
 
 def get_scrapers(scraper_names, headless=False):
     """
-    Retorna lista de scrapers baseado nos nomes
+    Create scraper instances using ScraperFactory
 
     Args:
-        scraper_names: Lista de nomes de scrapers
-        headless: Se deve executar em modo headless
+        scraper_names: List of scraper names to create
+        headless: Whether to run in headless mode
 
     Returns:
-        Lista de instâncias de scrapers
+        List of scraper instances
     """
-    scraper_map = {
-        "pichau": PichauScraper,
-        "kabum": KabumScraper,
-        "terabyte": TerabyteScraper,
+    store_map = {
+        "pichau": Store.PICHAU,
+        "kabum": Store.KABUM,
+        "terabyte": Store.TERABYTE,
     }
 
-    # Se 'all' está na lista, retorna todos
+    # If 'all' is in the list, use all stores
     if "all" in scraper_names:
         scraper_names = ["pichau", "kabum", "terabyte"]
 
     scrapers = []
     for name in scraper_names:
-        if name in scraper_map:
-            scrapers.append(scraper_map[name](headless=headless))
+        if name in store_map:
+            scraper = ScraperFactory.create(store_map[name])
+            scrapers.append(scraper)
 
     return scrapers
 
 
 def main():
-    """Função principal"""
+    """Main entry point"""
     args = parse_arguments()
 
-    # Setup logger
-    logger = setup_logger("main", level="INFO")
-
-    # Cabeçalho
-    print_header("🛒 SCRAPER DE PREÇOS - PLACAS DE VÍDEO")
+    # Header
+    _print_header("🛒 SCRAPER DE PREÇOS - PLACAS DE VÍDEO")
     print(f"⏰ Início: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"🎯 Scrapers: {', '.join(args.scraper)}")
     print(f"👁️ Modo: {'Headless' if args.headless else 'Visual'}")
     print()
 
-    # Garante que o banco existe
+    # Ensure database tables exist
     logger.info("Inicializando banco de dados...")
-    database.create_table()
+    create_tables()
 
-    # Mostra estatísticas iniciais se solicitado
+    # Show initial stats if requested
     if args.stats:
         print("\n📊 ESTATÍSTICAS INICIAIS")
         print("=" * 60)
-        stats = database.get_stats()
-        for key, value in stats.items():
-            print(f"  {key}: {value}")
+        with get_db_session() as session:
+            repo = ProductRepository(session)
+            stats = repo.get_stats()
+            for key, value in stats.items():
+                print(f"  {key}: {value}")
         print()
 
-    # Obtém scrapers
+    # Get scrapers via Factory
     scrapers = get_scrapers(args.scraper, headless=args.headless)
 
     if not scrapers:
         logger.error("Nenhum scraper válido selecionado!")
         sys.exit(1)
 
-    # Executa scrapers
+    # Execute scrapers
     start_time = datetime.now()
     successful = 0
     failed = 0
-
-    # Executa scrapers
-    start_time = datetime.now()
-    successful = 0
-    failed = 0
-
-    # Run async
-    import asyncio
 
     async def run_async_scrapers():
         nonlocal successful, failed
@@ -133,8 +156,6 @@ def main():
             logger.info(f"Iniciando {scraper_name}...")
 
             try:
-                # The run method is now async and handles its own browser resource management
-                # It does not take arguments
                 await scraper.run()
                 successful += 1
                 logger.info(f"✅ {scraper_name} concluído com sucesso")
@@ -152,42 +173,44 @@ def main():
     except KeyboardInterrupt:
         pass
 
-    # Calcula duração
+    # Calculate duration
     end_time = datetime.now()
     duration = (end_time - start_time).total_seconds()
 
-    # Estatísticas finais
+    # Final report
     print("\n" + "=" * 60)
     print("📊 RELATÓRIO FINAL")
     print("=" * 60)
-    print(f"⏱️ Duração total: {format_duration(duration)}")
+    print(f"⏱️ Duração total: {_format_duration(duration)}")
     print(f"✅ Scrapers bem-sucedidos: {successful}")
     print(f"❌ Scrapers com falha: {failed}")
     print()
 
-    # Estatísticas do banco
-    stats = database.get_stats()
-    print("📈 Estatísticas do Banco:")
-    for key, value in stats.items():
-        print(f"  • {key}: {value}")
-    print()
-
-    # Exportação se solicitada
-    if args.export:
-        print("📤 Exportando dados...")
-
-        if args.export in ["csv", "both"]:
-            csv_file = database.export_to_csv()
-            print(f"  ✓ CSV: {csv_file}")
-
-        if args.export in ["json", "both"]:
-            json_file = database.export_to_json()
-            print(f"  ✓ JSON: {json_file}")
-
+    # Database stats
+    with get_db_session() as session:
+        repo = ProductRepository(session)
+        stats = repo.get_stats()
+        print("📈 Estatísticas do Banco:")
+        for key, value in stats.items():
+            print(f"  • {key}: {value}")
         print()
 
-    # Mensagem final
-    print_header("✅ COLETA FINALIZADA")
+        # Export if requested
+        if args.export:
+            print("📤 Exportando dados...")
+
+            if args.export in ["csv", "both"]:
+                csv_file = repo.export_to_csv()
+                print(f"  ✓ CSV: {csv_file}")
+
+            if args.export in ["json", "both"]:
+                json_file = repo.export_to_json()
+                print(f"  ✓ JSON: {json_file}")
+
+            print()
+
+    # Final message
+    _print_header("✅ COLETA FINALIZADA")
     logger.info("Programa encerrado")
 
 

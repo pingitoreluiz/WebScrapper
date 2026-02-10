@@ -4,6 +4,9 @@ Repository pattern for database operations
 Provides clean abstraction over database queries.
 """
 
+import csv
+import json
+import os
 from typing import List, Optional
 from datetime import datetime, timedelta
 
@@ -271,6 +274,98 @@ class ProductRepository:
         logger.info("old_products_deleted", count=count, days=days)
 
         return count
+
+    def _get_data_dir(self) -> str:
+        """Get the data directory for exports"""
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(base_dir)))
+        data_dir = os.path.join(project_root, "data")
+        os.makedirs(data_dir, exist_ok=True)
+        return data_dir
+
+    def export_to_csv(self, output_file: Optional[str] = None) -> str:
+        """
+        Export all products to CSV
+
+        Args:
+            output_file: Output file path (optional, auto-generated if None)
+
+        Returns:
+            Path to the generated file
+        """
+        if output_file is None:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_file = os.path.join(self._get_data_dir(), f"export_{timestamp}.csv")
+
+        products = (
+            self.session.query(Product)
+            .order_by(Product.store, Product.price_value)
+            .all()
+        )
+
+        column_names = [
+            "id", "title", "price_raw", "price_value", "chip_brand",
+            "manufacturer", "model", "url", "store", "scraped_at",
+            "created_at", "updated_at",
+        ]
+
+        with open(output_file, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(column_names)
+            for p in products:
+                writer.writerow([
+                    p.id, p.title, p.price_raw, p.price_value, p.chip_brand,
+                    p.manufacturer, p.model, p.url, p.store,
+                    p.scraped_at.isoformat() if p.scraped_at else None,
+                    p.created_at.isoformat() if p.created_at else None,
+                    p.updated_at.isoformat() if p.updated_at else None,
+                ])
+
+        logger.info("products_exported_csv", file=output_file, count=len(products))
+        return output_file
+
+    def export_to_json(self, output_file: Optional[str] = None) -> str:
+        """
+        Export all products to JSON
+
+        Args:
+            output_file: Output file path (optional, auto-generated if None)
+
+        Returns:
+            Path to the generated file
+        """
+        if output_file is None:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_file = os.path.join(self._get_data_dir(), f"export_{timestamp}.json")
+
+        products = (
+            self.session.query(Product)
+            .order_by(Product.store, Product.price_value)
+            .all()
+        )
+
+        data = []
+        for p in products:
+            data.append({
+                "id": p.id,
+                "title": p.title,
+                "price_raw": p.price_raw,
+                "price_value": p.price_value,
+                "chip_brand": p.chip_brand,
+                "manufacturer": p.manufacturer,
+                "model": p.model,
+                "url": p.url,
+                "store": p.store,
+                "scraped_at": p.scraped_at.isoformat() if p.scraped_at else None,
+                "created_at": p.created_at.isoformat() if p.created_at else None,
+                "updated_at": p.updated_at.isoformat() if p.updated_at else None,
+            })
+
+        with open(output_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+        logger.info("products_exported_json", file=output_file, count=len(products))
+        return output_file
 
     def _to_product_in_db(self, product: Product) -> ProductInDB:
         """Convert SQLAlchemy model to Pydantic model"""

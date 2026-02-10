@@ -10,7 +10,7 @@ from datetime import datetime
 import time
 
 from playwright.async_api import Page, async_playwright, Playwright
-from playwright_stealth import stealth_async
+from playwright_stealth import Stealth
 from fake_useragent import UserAgent
 import random
 import asyncio
@@ -270,8 +270,9 @@ class BaseScraper(ABC):
 
         self.page = await self.context.new_page()
 
-        # Apply stealth
-        await stealth_async(self.page)
+        # Apply stealth (playwright-stealth v2 API)
+        stealth = Stealth()
+        await stealth.apply_stealth_async(self.page)
 
         self.page.set_default_timeout(self.config.timeout)
 
