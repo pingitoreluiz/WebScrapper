@@ -10,14 +10,15 @@ from src.backend.core.database import get_db_session, create_tables
 from src.backend.core.repository import ProductRepository
 from src.backend.core.models import EnrichedProduct, Price, Store, ChipBrand
 
+
 def seed_database():
     """Seed database with valid sample data for E2E tests"""
     print("Seeding database...")
     create_tables()
-    
+
     with get_db_session() as session:
         repo = ProductRepository(session)
-        
+
         # Check if we already have data
         existing = repo.get_all(limit=1)
         if existing:
@@ -33,7 +34,7 @@ def seed_database():
                 chip_brand=ChipBrand.NVIDIA,
                 manufacturer="ASUS",
                 model="RTX 4090",
-                scraped_at=datetime.now()
+                scraped_at=datetime.now(),
             ),
             EnrichedProduct(
                 title="Placa de Vídeo MSI GeForce RTX 4080 16GB VENTUS 3X",
@@ -43,7 +44,7 @@ def seed_database():
                 chip_brand=ChipBrand.NVIDIA,
                 manufacturer="MSI",
                 model="RTX 4080",
-                scraped_at=datetime.now()
+                scraped_at=datetime.now(),
             ),
             EnrichedProduct(
                 title="Placa de Vídeo Gigabyte Radeon RX 7900 XTX Gaming OC 24GB",
@@ -53,15 +54,16 @@ def seed_database():
                 chip_brand=ChipBrand.AMD,
                 manufacturer="GIGABYTE",
                 model="RX 7900 XTX",
-                scraped_at=datetime.now()
-            )
+                scraped_at=datetime.now(),
+            ),
         ]
-        
+
         for p in products:
             repo.create(p)
             print(f"Created product: {p.title[:30]}...")
 
     print("Database seeding completed.")
+
 
 if __name__ == "__main__":
     seed_database()

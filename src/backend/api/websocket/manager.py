@@ -5,11 +5,13 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class ConnectionManager:
     """
     Manages WebSocket connections and broadcasting.
     Implemented as a Singleton to be shared across the application.
     """
+
     _instance = None
 
     def __new__(cls):
@@ -26,7 +28,9 @@ class ConnectionManager:
     def disconnect(self, websocket: WebSocket):
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
-            logger.info(f"WebSocket disconnected. Remaining: {len(self.active_connections)}")
+            logger.info(
+                f"WebSocket disconnected. Remaining: {len(self.active_connections)}"
+            )
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
         try:
@@ -45,6 +49,7 @@ class ConnectionManager:
             except Exception as e:
                 logger.error(f"Error broadcasting message: {e}")
                 self.disconnect(connection)
+
 
 # Global instance
 manager = ConnectionManager()

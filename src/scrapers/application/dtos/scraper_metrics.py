@@ -13,9 +13,9 @@ from typing import Optional
 class ScraperMetricsDTO:
     """
     DTO for scraper execution metrics.
-    
+
     Carries metrics data for reporting and monitoring.
-    
+
     Attributes:
         store: Store that was scraped
         started_at: When scraping started
@@ -30,7 +30,7 @@ class ScraperMetricsDTO:
         success: Whether the run completed successfully
         error_message: Error message if failed
     """
-    
+
     store: str
     started_at: datetime
     finished_at: Optional[datetime] = None
@@ -43,22 +43,22 @@ class ScraperMetricsDTO:
     captchas_detected: int = 0
     success: bool = False
     error_message: Optional[str] = None
-    
+
     def get_success_rate(self) -> float:
         """
         Calculate success rate (saved / found).
-        
+
         Returns:
             Success rate as percentage (0-100)
         """
         if self.products_found == 0:
             return 0.0
         return (self.products_saved / self.products_found) * 100
-    
+
     def to_dict(self) -> dict:
         """
         Convert to dictionary for JSON serialization.
-        
+
         Returns:
             Dictionary representation
         """

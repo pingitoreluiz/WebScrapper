@@ -304,22 +304,40 @@ class ProductRepository:
         )
 
         column_names = [
-            "id", "title", "price_raw", "price_value", "chip_brand",
-            "manufacturer", "model", "url", "store", "scraped_at",
-            "created_at", "updated_at",
+            "id",
+            "title",
+            "price_raw",
+            "price_value",
+            "chip_brand",
+            "manufacturer",
+            "model",
+            "url",
+            "store",
+            "scraped_at",
+            "created_at",
+            "updated_at",
         ]
 
         with open(output_file, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(column_names)
             for p in products:
-                writer.writerow([
-                    p.id, p.title, p.price_raw, p.price_value, p.chip_brand,
-                    p.manufacturer, p.model, p.url, p.store,
-                    p.scraped_at.isoformat() if p.scraped_at else None,
-                    p.created_at.isoformat() if p.created_at else None,
-                    p.updated_at.isoformat() if p.updated_at else None,
-                ])
+                writer.writerow(
+                    [
+                        p.id,
+                        p.title,
+                        p.price_raw,
+                        p.price_value,
+                        p.chip_brand,
+                        p.manufacturer,
+                        p.model,
+                        p.url,
+                        p.store,
+                        p.scraped_at.isoformat() if p.scraped_at else None,
+                        p.created_at.isoformat() if p.created_at else None,
+                        p.updated_at.isoformat() if p.updated_at else None,
+                    ]
+                )
 
         logger.info("products_exported_csv", file=output_file, count=len(products))
         return output_file
@@ -346,20 +364,22 @@ class ProductRepository:
 
         data = []
         for p in products:
-            data.append({
-                "id": p.id,
-                "title": p.title,
-                "price_raw": p.price_raw,
-                "price_value": p.price_value,
-                "chip_brand": p.chip_brand,
-                "manufacturer": p.manufacturer,
-                "model": p.model,
-                "url": p.url,
-                "store": p.store,
-                "scraped_at": p.scraped_at.isoformat() if p.scraped_at else None,
-                "created_at": p.created_at.isoformat() if p.created_at else None,
-                "updated_at": p.updated_at.isoformat() if p.updated_at else None,
-            })
+            data.append(
+                {
+                    "id": p.id,
+                    "title": p.title,
+                    "price_raw": p.price_raw,
+                    "price_value": p.price_value,
+                    "chip_brand": p.chip_brand,
+                    "manufacturer": p.manufacturer,
+                    "model": p.model,
+                    "url": p.url,
+                    "store": p.store,
+                    "scraped_at": p.scraped_at.isoformat() if p.scraped_at else None,
+                    "created_at": p.created_at.isoformat() if p.created_at else None,
+                    "updated_at": p.updated_at.isoformat() if p.updated_at else None,
+                }
+            )
 
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)

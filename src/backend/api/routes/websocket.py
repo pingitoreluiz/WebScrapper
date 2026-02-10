@@ -5,6 +5,7 @@ import logging
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+
 @router.websocket("/ws/dashboard")
 async def websocket_endpoint(websocket: WebSocket):
     """

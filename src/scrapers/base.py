@@ -97,14 +97,16 @@ class BaseScraper(ABC):
         """
         self.metrics.started_at = datetime.now()
         self.logger.info("scraper_started", store=self.get_store_name())
-        
+
         # Emit WebSocket event
         try:
-            await manager.broadcast({
-                "event": "scraper.started",
-                "timestamp": datetime.now(),
-                "data": {"store": self.get_store_name()}
-            })
+            await manager.broadcast(
+                {
+                    "event": "scraper.started",
+                    "timestamp": datetime.now(),
+                    "data": {"store": self.get_store_name()},
+                }
+            )
         except Exception as e:
             self.logger.warning(f"failed_to_broadcast_start: {e}")
 
@@ -154,11 +156,13 @@ class BaseScraper(ABC):
 
             # Emit WebSocket event
             try:
-                await manager.broadcast({
-                    "event": "scraper.completed",
-                    "timestamp": datetime.now(),
-                    "data": self.metrics.to_dict()
-                })
+                await manager.broadcast(
+                    {
+                        "event": "scraper.completed",
+                        "timestamp": datetime.now(),
+                        "data": self.metrics.to_dict(),
+                    }
+                )
             except Exception as e:
                 self.logger.warning(f"failed_to_broadcast_complete: {e}")
 
@@ -301,16 +305,18 @@ class BaseScraper(ABC):
 
         # Emit WebSocket event
         try:
-            await manager.broadcast({
-                "event": "scraper.progress",
-                "timestamp": datetime.now(),
-                "data": {
-                    "store": self.get_store_name(),
-                    "page": page_num,
-                    "products_found": self.metrics.products_found,
-                    "products_saved": self.metrics.products_saved
+            await manager.broadcast(
+                {
+                    "event": "scraper.progress",
+                    "timestamp": datetime.now(),
+                    "data": {
+                        "store": self.get_store_name(),
+                        "page": page_num,
+                        "products_found": self.metrics.products_found,
+                        "products_saved": self.metrics.products_saved,
+                    },
                 }
-            })
+            )
         except Exception as e:
             pass
 
@@ -531,16 +537,18 @@ class BaseScraper(ABC):
 
                 # Emit WebSocket event
                 try:
-                    await manager.broadcast({
-                        "event": "product.new",
-                        "timestamp": datetime.now(),
-                        "data": {
-                            "title": saved_product.title,
-                            "price": float(saved_product.price.value),
-                            "store": saved_product.store.value,
-                            "url": saved_product.url
+                    await manager.broadcast(
+                        {
+                            "event": "product.new",
+                            "timestamp": datetime.now(),
+                            "data": {
+                                "title": saved_product.title,
+                                "price": float(saved_product.price.value),
+                                "store": saved_product.store.value,
+                                "url": saved_product.url,
+                            },
                         }
-                    })
+                    )
                 except Exception as e:
                     self.logger.warning(f"failed_to_broadcast_product: {e}")
 
