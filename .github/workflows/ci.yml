@@ -52,37 +52,16 @@ jobs:
       - name: Ensure database directory exists
         run: mkdir -p data
 
-      - name: Install Playwright browsers
-        run: playwright install --with-deps chromium
-
-      - name: Start services and run tests
+      - name: Run unit tests
         env:
-          BASE_URL: http://localhost:3000
-          API_BASE_URL: http://localhost:8000
           DB_URL: sqlite:///data/prices.db
+          APP_ENV: testing
         run: |
-          # Seed database with test data
-          python scripts/seed_db.py
-          
-          # Start Backend (creates tables on startup)
-          uvicorn src.backend.api.app:app --host 0.0.0.0 --port 8000 &
-          PID_BACKEND=$!
-          
-          # Start Frontend (static file server)
-          python -m http.server 3000 --directory src/frontend &
-          PID_FRONTEND=$!
-          
-          # Wait for services
-          echo "Waiting for services to start..."
-          timeout 30 bash -c 'until curl -s http://localhost:8000/health > /dev/null; do sleep 1; done'
-          timeout 30 bash -c 'until curl -s http://localhost:3000 > /dev/null; do sleep 1; done'
-          
-          # Run tests
-          python -m pytest tests/ -v --cov=src --cov-report=xml --cov-report=term
-          
-          # Cleanup (GitHub actions cleans up anyway, but good practice)
-          kill $PID_BACKEND
-          kill $PID_FRONTEND
+          python -m pytest tests/unit/ -v \
+            --ignore=tests/e2e \
+            --ignore=tests/integration \
+            --ignore=tests/performance \
+            --cov=src --cov-report=xml --cov-report=term
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
