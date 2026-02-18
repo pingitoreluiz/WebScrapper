@@ -37,14 +37,18 @@ def get_engine() -> Engine:
 
         logger.info("creating_database_engine", url=config.database.url)
 
-        # Create engine with connection pooling
-        _engine = create_engine(
-            config.database.url,
-            echo=config.database.echo,
-            pool_size=config.database.pool_size,
-            max_overflow=config.database.max_overflow,
-            pool_pre_ping=True,  # Verify connections before using
-        )
+        # Build engine kwargs — SQLite uses SingletonThreadPool
+        # which does not support pool_size / max_overflow
+        engine_kwargs = {
+            "echo": config.database.echo,
+            "pool_pre_ping": True,
+        }
+
+        if "sqlite" not in config.database.url:
+            engine_kwargs["pool_size"] = config.database.pool_size
+            engine_kwargs["max_overflow"] = config.database.max_overflow
+
+        _engine = create_engine(config.database.url, **engine_kwargs)
 
         # Enable foreign keys for SQLite
         if "sqlite" in config.database.url:

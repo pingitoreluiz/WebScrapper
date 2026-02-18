@@ -184,9 +184,10 @@ class TestProductEndpoints:
 class TestScraperEndpoints:
     """Test scraper API endpoints"""
 
+    @patch("src.backend.api.routes.scrapers.run_scrapers_background")
     @patch("src.backend.api.routes.scrapers.get_scheduler")
     @patch("src.backend.api.routes.scrapers.get_db")
-    def test_run_scrapers(self, mock_get_db, mock_get_scheduler, client):
+    def test_run_scrapers(self, mock_get_db, mock_get_scheduler, mock_bg_task, client):
         """Test running scrapers"""
         # Mock scheduler
         mock_scheduler = Mock()
